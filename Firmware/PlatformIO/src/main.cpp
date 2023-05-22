@@ -271,7 +271,16 @@ Version :      DMK, Initial code
   // Perform factory reset switches
   // is pressed during powerup
   if( 0 == digitalRead(RST_PIN) ) {
+
+    // https://github.com/tzapu/WiFiManager/issues/1275#issuecomment-1492080302
+    // https://github.com/tzapu/WiFiManager/issues/1275#issuecomment-1492854563
+    // WiFi needs to be in WIFI_STA mode and save it's config persitent before the settings can be reset
+    WiFi.mode(WIFI_STA);
+    WiFi.persistent(true);
+
     wifiManager.resetSettings();
+    WiFi.persistent(false);
+
     deleteAppConfig();
     while(0 == digitalRead(RST_PIN)) {
        smartLedFlash(BLUE);
@@ -359,6 +368,10 @@ Version :      DMK, Initial code
 
   Serial.printf("DSMR settings\n");
   Serial.printf("\tP1 Baudrate     : %s baud\n", app_config.p1_baudrate);
+
+  Serial.printf("WiFi Settings\n");
+  Serial.printf("\tWiFi SSID       : %s\n", WiFi.SSID().c_str());
+  Serial.printf("\tIP Address      : %s\n", WiFi.localIP().toString().c_str());
 
   Serial.printf("***************************************************\n\n");
 
