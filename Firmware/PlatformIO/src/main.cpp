@@ -58,6 +58,7 @@
 #include "MqttSendlab.h"
 
 #define DEBUG
+#define DEBUG_P1_DATA "/KFM5KAIFA-METER\r\n\r\n1-3:0.2.8(40)\r\n0-0:1.0.0(150117185916W)\r\n0-0:96.1.1(0000000000000000000000000000000000)\r\n1-0:1.8.1(000671.578*kWh)\r\n1-0:1.8.2(000842.472*kWh)\r\n1-0:2.8.1(000000.000*kWh)\r\n1-0:2.8.2(000000.000*kWh)\r\n0-0:96.14.0(0001)\r\n1-0:1.7.0(00.333*kW)\r\n1-0:2.7.0(00.000*kW)\r\n0-0:17.0.0(999.9*kW)\r\n0-0:96.3.10(1)\r\n0-0:96.7.21(00008)\r\n0-0:96.7.9(00007)\r\n1-0:99.97.0(1)(0-0:96.7.19)(000101000001W)(2147483647*s)\r\n1-0:32.32.0(00000)\r\n1-0:32.36.0(00000)\r\n0-0:96.13.1()\r\n0-0:96.13.0()\r\n1-0:31.7.0(001*A)\r\n1-0:21.7.0(00.332*kW)\r\n1-0:22.7.0(00.000*kW)\r\n0-1:24.1.0(003)\r\n0-1:96.1.0(0000000000000000000000000000000000)\r\n0-1:24.2.1(150117180000W)(00473.789*m3)\r\n0-1:24.4.0(1)\r\n!6F4A\r\n"
 
 #ifdef DEBUG
  #define DEBUG_PRINTF(format, ...) (Serial1.printf(format, __VA_ARGS__))
@@ -399,6 +400,10 @@ Version :      DMK, Initial code
     Serial1.begin(115200, SERIAL_8N1);
     DEBUG_PRINTF("\n\r%s\n\r", "Debug mode ON ..." );
   #endif
+
+  #ifdef DEBUG_P1_DATA
+    memccpy(p1_buf, DEBUG_P1_DATA, '\0', P1_MAX_DATAGRAM_SIZE);
+  #endif
  
   // Allow bootloader to connect: do not remove!
   delay(2000);
@@ -658,12 +663,14 @@ notes:
 Version :      DMK, Initial code
 *******************************************************************/
 {
+  #ifndef DEBUG_P1_DATA
    if( (p1 - p1_buf) < P1_MAX_DATAGRAM_SIZE ) {
       *p1 = ch;
       p1++; 
    } else {
       DEBUG_PRINTF("%s:P1 buffer overflow\n\r", __FUNCTION__); 
    }
+  #endif
 }
 
 /*******************************************************************/
@@ -676,8 +683,10 @@ notes:
 Version :      DMK, Initial code
 *******************************************************************/
 {
+  #ifndef DEBUG_P1_DATA
    p1 = p1_buf;
    *p1='\0';
+  #endif
 }
 
 /*******************************************************************/
@@ -732,6 +741,11 @@ Version :      DMK, Initial code
          }
       }
    }
+
+   #ifdef DEBUG_P1_DATA
+    retval = true;
+   #endif
+
    return retval;
 }
 
